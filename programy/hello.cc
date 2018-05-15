@@ -1,12 +1,8 @@
-// Program zaświeca pojedynczą diodę LED w czasie naciśnięcia przycisku.
-//
-// Wymagane połączenia w układzie ZL15AVR:
-//        PA0 - LED 0
-//        PA1 - SW0
-//
-// Autor: Paweł Klimczewski, 15 stycznia 2010.
+// Program zaświeca pojedynczą diodę LED
+// Autor: Przemysław Czechowski
 
 #include <avr/io.h>
+#include <util/delay.h>
 
 //---------------------------------------------------------------------------
 void configure_pins()
@@ -22,8 +18,12 @@ int main()
   configure_pins();
   while ( true )
   {
-      PORTB |= 1 << PB5; // Włączam diodę.
+    _delay_ms(100);
+    PORTB |= 1 << PB5; // Włączam diodę.
+    _delay_ms(100);
+    PORTB &= ~(1 << PB5);
   }
+
   return 0;
 }
 //---------------------------------------------------------------------------
