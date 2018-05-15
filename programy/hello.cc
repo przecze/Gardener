@@ -12,16 +12,44 @@ void configure_pins()
   // bez rezystora podciągającego, zatem dodatkowa konfiguracja nie jest
   // potrzebna.
 }
+void short_flash()
+{
+    _delay_ms(140);
+    PORTB |= 1 << PB5; // Włączam diodę.
+    _delay_ms(20);
+    PORTB &= ~(1 << PB5);
+    _delay_ms(140);
+}
+void long_flash()
+{
+    _delay_ms(50);
+    PORTB |= 1 << PB5; // Włączam diodę.
+    _delay_ms(200);
+    PORTB &= ~(1 << PB5);
+    _delay_ms(50);
+}
+
+
 //---------------------------------------------------------------------------
 int main()
 {
   configure_pins();
+  int count = 0;
   while ( true )
   {
-    _delay_ms(100);
-    PORTB |= 1 << PB5; // Włączam diodę.
-    _delay_ms(100);
-    PORTB &= ~(1 << PB5);
+    count++;
+    for(int i = 0; i<6; ++i)
+    {
+      if( 1 == ( (count>>i) & 1 ) )
+      {
+        long_flash();
+      }
+      else
+      {
+        short_flash();
+      }
+    }
+    _delay_ms(500);
   }
 
   return 0;
