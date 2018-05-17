@@ -4,6 +4,27 @@
 #include <avr/io.h>
 #include <util/delay.h>
 
+class Sound
+{
+  int * data;
+  int length;
+  Sound(int f)
+  {
+    data = new int[length];
+    for( int i = 0; i < length; ++i)
+    {
+
+    }
+  }
+  ~Sound()
+  {
+    for(int i  = 0; i< length; ++i)
+    {
+      delete &(data[i]);
+    }
+  }
+};
+
 //---------------------------------------------------------------------------
 void configure_pins()
 {
@@ -29,27 +50,32 @@ void long_flash()
     _delay_ms(50);
 }
 
+template<int delay>
+void play_sound(long long int count = 500000)
+{
+  for(long long int i = 0; i<count; i+=2*delay)
+  {
+    PORTD |= 1 << PD5; // Włączam diodę.
+    PORTB |= 1 << PD2; // Włączam diodę.
+    PORTB |= 1 << PB5; // Włączam diodę.
+    _delay_us(delay);
+    PORTD &= ~(1 << PD5);
+    PORTB &= ~(1 << PB2);
+    PORTB &= ~(1 << PB5);
+    _delay_us(delay);
+  }
+}
+
 
 //---------------------------------------------------------------------------
 int main()
 {
   configure_pins();
-  int count = 0;
   while ( true )
   {
-    count++;
-    for(int i = 0; i<6; ++i)
-    {
-      if( 1 == ( (count>>i) & 1 ) )
-      {
-        long_flash();
-      }
-      else
-      {
-        short_flash();
-      }
-    }
-    _delay_ms(500);
+    play_sound<1000>();
+    play_sound<1000>();
+    play_sound<2000>();
   }
 
   return 0;
