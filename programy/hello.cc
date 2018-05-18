@@ -3,6 +3,7 @@
 
 #include <avr/io.h>
 #include <util/delay.h>
+#include <math.h>
 
 class Sound
 {
@@ -28,11 +29,41 @@ class Sound
 //---------------------------------------------------------------------------
 void configure_pins()
 {
-  // Ustaw wyprowadzenie PA0 w tryb wyjścia.
-  // Wyprowadzenie PA1 jest początkowo ustawione jako wejściowe
-  // bez rezystora podciągającego, zatem dodatkowa konfiguracja nie jest
-  // potrzebna.
+    DDRB |= (1 << DDB1)|(1 << DDB2);
+    // PB1 and PB2 is now an output
+
+    ICR1 = (1 << 3); //sets top 16, update every 1 us
+
+    OCR1A = 0x3FFF;
+    // set PWM for 25% duty cycle @ 16bit
+
+    OCR1B = 0xBFFF;
+    // set PWM for 75% duty cycle @ 16bit
+
+    TCCR1A |= (1 << COM1A1)|(1 << COM1B1);
+    // set none-inverting mode
+
+    TCCR1A |= (1 << WGM11);
+    TCCR1B |= (1 << WGM12)|(1 << WGM13);
+    // set Fast PWM mode using ICR1 as TOP
+    
+    TCCR1B |= (1 << CS10);
+    // START the timer with no prescaler
+
 }
+
+
+void play(int * signal)
+{
+  for(int i=0; i < 32; i+= 1)
+  {
+    OCR1A = signal[i];
+    OCR1B = signal[i];
+    _delay_us(100);
+  }
+
+}
+
 void short_flash()
 {
     _delay_ms(140);
@@ -66,16 +97,25 @@ void play_sound(long long int count = 500000)
   }
 }
 
+int normalize(double max, double value)
+{
+  return int(16*((value + max)/max) + 0.5);
+}
+
 
 //---------------------------------------------------------------------------
 int main()
 {
   configure_pins();
+  //int signal[32] =  {0,  0,  1,  1,  2,  4,  5,  7,  8, 10, 12, 13, 14, 15, 16, 16, 16, 16, 15, 14, 13, 12, 10,  8,  7,  5,  4,  2,  1,  1,  0,  0};
+  int sig2[32];
+  for( int i = 0; i<32; i++ )
+  {
+    sig2[i] = normalize(2, cos(-M_PI + (M_2_PI*i)/32) + cos(-M_PI + (M_2_PI*i)/48));
+  }
   while ( true )
   {
-    play_sound<1000>();
-    play_sound<1000>();
-    play_sound<2000>();
+    play(sig2);
   }
 
   return 0;
