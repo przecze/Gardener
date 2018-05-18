@@ -5,23 +5,68 @@
 #include <util/delay.h>
 #include <math.h>
 
+template <class T>
+class unique_ptr
+{
+ public:
+
+  unique_ptr() : payload(nullptr) {}
+
+  unique_ptr(T * t): payload(t) {}
+
+  T * get() { return payload; }
+
+  T * release(T * t = nullptr)
+  {
+    T* tmp = payload;
+    payload = t;
+    return t;
+  }
+
+  bool isNull() { return payload == nullptr;}
+
+  ~unique_ptr(){ delete payload; }
+
+ private:
+  T * payload;
+};
+
 class Sound
 {
+ public:
   int * data;
+  bool prepared;
   int length;
-  Sound(int f)
-  {
-    data = new int[length];
-    for( int i = 0; i < length; ++i)
-    {
+  double amplitude; // in V
+  double frequency; // in Hz
+  double start; // in ms
+  double end; // in ms
+  unique_ptr<Sound> child; // when the destructor is called, also all the children will be destroyed
 
-    }
+  Sound& add( Sound* sound )
+  {
+    child = unique_ptr<Sound>{sound};
+    return *child.get();
   }
+
+  Sound(int length, double amplitude, double duration):
+    prepared(false), length(length), amplitude(amplitude), start(0.), end(duration)
+  {
+  }
+
+  bool prepare()
+  {
+    return false; //not implemented
+  }
+
   ~Sound()
   {
-    for(int i  = 0; i< length; ++i)
+    if(prepared)
     {
-      delete &(data[i]);
+      for(int i  = 0; i< length; ++i)
+      {
+        delete &(data[i]);
+      }
     }
   }
 };
