@@ -5,6 +5,7 @@
 #include <util/delay.h>
 #include <math.h>
 
+#define TIME_STEP_MS 100
 template <class T>
 class unique_ptr
 {
@@ -15,6 +16,13 @@ class unique_ptr
   unique_ptr(T * t): payload(t) {}
 
   T * get() { return payload; }
+
+  T * reset(T * new_ptr = nullptr)
+  {
+    T * old_ptr = payload;
+    payload = new_ptr;
+    if(old_ptr != nullptr) delete old_ptr;
+  }
 
   T * release(T * t = nullptr)
   {
@@ -156,7 +164,8 @@ int main()
   int sig2[32];
   for( int i = 0; i<32; i++ )
   {
-    sig2[i] = normalize(2, cos(-M_PI + (M_2_PI*i)/32) + cos(-M_PI + (M_2_PI*i)/48));
+    //sig2[i] = normalize(2, cos(-M_PI + (M_2_PI*i)/32) + cos(-M_PI + (M_2_PI*i)/48));
+    sig2[i] = normalize(1, cos(-M_PI + (M_2_PI*i)/32));
   }
   while ( true )
   {

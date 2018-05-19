@@ -2,7 +2,7 @@ ALL=hello
 F_CPU=16000000
 
 CC=avr-gcc
-CFLAGS= -Wall -O2 -DF_CPU=$(F_CPU) -gstabs
+CFLAGS= -Wall -O2 -DF_CPU=$(F_CPU) -gstabs -std=c++11
 CXX="C:\Program Files (x86)\Arduino\hardware\tools\avr/bin/avr-g++"
 CXXFLAGS=$(CFLAGS)
 LDFLAGS=-mmcu=atmega328p
