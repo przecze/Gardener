@@ -4,48 +4,8 @@
 #include <util/delay.h>
 #include <math.h>
 #include <unique_ptr.h>
-
-#define TIME_STEP_MS 100
-
-class Sound
-{
- public:
-  int * data;
-  bool prepared;
-  int length;
-  double amplitude; // in V
-  double frequency; // in Hz
-  double start; // in ms
-  double end; // in ms
-  unique_ptr<Sound> child; // when the destructor is called, also all the children will be destroyed
-
-  Sound& add( Sound* sound )
-  {
-    child = unique_ptr<Sound>{sound};
-    return *child.get();
-  }
-
-  Sound(int length, double amplitude, double duration):
-    prepared(false), length(length), amplitude(amplitude), start(0.), end(duration)
-  {
-  }
-
-  bool prepare()
-  {
-    return false; //not implemented
-  }
-
-  ~Sound()
-  {
-    if(prepared)
-    {
-      for(int i  = 0; i< length; ++i)
-      {
-        delete &(data[i]);
-      }
-    }
-  }
-};
+#include <defines.h>
+#include <Sound.h>
 
 //---------------------------------------------------------------------------
 void configure_pins()
@@ -74,7 +34,7 @@ void configure_pins()
 }
 
 
-void play(int * signal)
+void play(short * signal)
 {
   for(int i=0; i < 32; i+= 1)
   {
@@ -84,60 +44,14 @@ void play(int * signal)
   }
 
 }
-
-void short_flash()
-{
-    _delay_ms(140);
-    PORTB |= 1 << PB5; // Włączam diodę.
-    _delay_ms(20);
-    PORTB &= ~(1 << PB5);
-    _delay_ms(140);
-}
-void long_flash()
-{
-    _delay_ms(50);
-    PORTB |= 1 << PB5; // Włączam diodę.
-    _delay_ms(200);
-    PORTB &= ~(1 << PB5);
-    _delay_ms(50);
-}
-
-template<int delay>
-void play_sound(long long int count = 500000)
-{
-  for(long long int i = 0; i<count; i+=2*delay)
-  {
-    PORTD |= 1 << PD5; // Włączam diodę.
-    PORTB |= 1 << PD2; // Włączam diodę.
-    PORTB |= 1 << PB5; // Włączam diodę.
-    _delay_us(delay);
-    PORTD &= ~(1 << PD5);
-    PORTB &= ~(1 << PB2);
-    PORTB &= ~(1 << PB5);
-    _delay_us(delay);
-  }
-}
-
-int normalize(double max, double value)
-{
-  return int(16*((value + max)/max) + 0.5);
-}
-
-
 //---------------------------------------------------------------------------
 int main()
 {
   configure_pins();
-  //int signal[32] =  {0,  0,  1,  1,  2,  4,  5,  7,  8, 10, 12, 13, 14, 15, 16, 16, 16, 16, 15, 14, 13, 12, 10,  8,  7,  5,  4,  2,  1,  1,  0,  0};
-  int sig2[32];
-  for( int i = 0; i<32; i++ )
-  {
-    //sig2[i] = normalize(2, cos(-M_PI + (M_2_PI*i)/32) + cos(-M_PI + (M_2_PI*i)/48));
-    sig2[i] = normalize(1, cos(-M_PI + (M_2_PI*i)/32));
-  }
+  Sound sound{440., 1.};
   while ( true )
   {
-    play(sig2);
+    play(sound.data.get());
   }
 
   return 0;
