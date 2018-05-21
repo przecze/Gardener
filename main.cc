@@ -4,8 +4,9 @@
 #include <util/delay.h>
 #include <math.h>
 #include <unique_ptr.h>
-#include <defines.h>
 #include <Sound.h>
+#include <defines.h>
+//#include <Sound.h>
 
 //---------------------------------------------------------------------------
 void configure_pins()
@@ -36,7 +37,7 @@ void configure_pins()
 
 void play(short * signal)
 {
-  for(int i=0; i < 32; i+= 1)
+  for(int i=0; i < SIGNAL_LENGTH; i+= 1)
   {
     OCR1A = signal[i];
     OCR1B = signal[i];
@@ -48,10 +49,18 @@ void play(short * signal)
 int main()
 {
   configure_pins();
-  Sound sound{440., 1.};
   while ( true )
   {
-    play(sound.data.get());
+    Sound sound{440., 1.};
+    Sound s2{480., 0.0};
+    sound.add(&s2);
+    Signal sig(sound);
+    for(int i = 0; i<100; ++i) play(sig.data);
+    Sound s3{440., 1.};
+    Sound s4{660., .2};
+    s3.add(&s4);
+    Signal sig2(s3);
+    for(int i = 0; i<100; ++i) play(sig2.data);
   }
 
   return 0;
