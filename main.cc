@@ -14,14 +14,7 @@ void configure_pins()
     DDRB |= (1 << DDB1)|(1 << DDB2);
     // PB1 and PB2 is now an output
 
-    ICR1 = (1 << 3); //sets top 16, update every 1 us
-
-    OCR1A = 0x3FFF;
-    // set PWM for 25% duty cycle @ 16bit
-
-    OCR1B = 0xBFFF;
-    // set PWM for 75% duty cycle @ 16bit
-
+    ICR1 = ANALOG_RANGE;
     TCCR1A |= (1 << COM1A1)|(1 << COM1B1);
     // set none-inverting mode
 
@@ -35,13 +28,16 @@ void configure_pins()
 }
 
 
-void play(short * signal)
+void play(unsigned short * signal)
 {
+  unsigned short to_set;
   for(int i=0; i < SIGNAL_LENGTH; i+= 1)
   {
-    OCR1A = signal[i];
-    OCR1B = signal[i];
-    _delay_us(100);
+    to_set = i;
+    to_set  = signal[i];
+    OCR1A = to_set;
+    OCR1B = to_set;
+    _delay_us(TIME_RES_US);
   }
 
 }
@@ -52,15 +48,15 @@ int main()
   while ( true )
   {
     Sound sound{440., 1.};
-    Sound s2{480., 0.0};
-    sound.add(&s2);
+    //Sound s2{480., 0.0};
+    //sound.add(&s2);
     Signal sig(sound);
     for(int i = 0; i<100; ++i) play(sig.data);
-    Sound s3{440., 1.};
-    Sound s4{660., .2};
-    s3.add(&s4);
-    Signal sig2(s3);
-    for(int i = 0; i<100; ++i) play(sig2.data);
+    //Sound s3{440., 1.};
+    //Sound s4{660., .2};
+    //s3.add(&s4);
+    //Signal sig2(s3);
+    //for(int i = 0; i<100; ++i) play(sig2.data);
   }
 
   return 0;

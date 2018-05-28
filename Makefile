@@ -10,13 +10,16 @@ OBJCOPY=avr-objcopy
 AVRDUDE=avrdude -c arduino -p m328p -P COM8 -b 57600
 CXXFLAGS=$(CFLAGS) $(INCFLAGS)
 
-%.s: %.cc
+test: test.cc Sound.h
+	g++ -std=c++14 -I. -D TEST test.cc
+
+main.s: main.cc Sound.h defines.h
 	$(CXX) $(CXXFLAGS) -S $<
 	
-%.hex: %
+main.hex: main
 	$(OBJCOPY) -O ihex $< $@
 
-%.upload: %.hex
+main.upload: main.hex
 	$(AVRDUDE) -U flash:w:$<
 
 .PHONY: all

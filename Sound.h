@@ -1,6 +1,14 @@
 #pragma once
 #include <unique_ptr.h>
 #include <defines.h>
+
+#ifdef TEST
+  #include <cmath>
+  #ifndef M_PI
+      #define M_PI 3.14159265358979323846
+  #endif
+#endif
+
 class Sound
 {
  public:
@@ -9,6 +17,7 @@ class Sound
   double amplitude; // in V
   double start; // in ms
   double end; // in ms
+  double scale;
   int length;
   Sound * child;
 
@@ -18,14 +27,15 @@ class Sound
     return *sound;
   }
 
-  Sound(double frequency, double amplitude = 5.):
+  Sound(double frequency, double amplitude = 1.):
     frequency(frequency), amplitude(amplitude), child(nullptr)
   {
+    scale = frequency * TIME_RES_US/(1000000.) *2*M_PI;
   }
 
   double localAmplitude(int x) const
   {
-    auto ret = amplitude*cos(x*frequency);
+    auto ret = amplitude*cos(scale *x);
     if (child != nullptr) ret+= child->localAmplitude(x);
     return ret;
   }
@@ -39,21 +49,24 @@ class Sound
 class Signal
 {
  public:
-  short data[SIGNAL_LENGTH];
+  unsigned short data[SIGNAL_LENGTH];
   Signal(const Sound & sound)
   {
     double amps[SIGNAL_LENGTH];
     double max_amp = 0;
+    double min_amp = 0;
     for (int i = 0; i < SIGNAL_LENGTH; ++i)
     {
       auto amp = sound.localAmplitude(i);
       if(max_amp < amp) max_amp = amp;
+      if(min_amp > amp) min_amp = amp;
       amps[i] = amp;
     }
     for (int i = 0; i < SIGNAL_LENGTH; ++i)
     {
       auto amp = amps[i];
-      short norm_amp = short(amp/max_amp * ANALOG_RANGE + 0.5);
+      auto tamp = (amp - min_amp)/(max_amp - min_amp);
+      short norm_amp = short(tamp * ANALOG_RANGE + 0.5);
       data[i] = norm_amp;
     }
   }
