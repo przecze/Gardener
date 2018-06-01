@@ -6,7 +6,7 @@
 #include <unique_ptr.h>
 #include <Sound.h>
 #include <defines.h>
-//#include <Sound.h>
+#include <Notes.h>
 
 //---------------------------------------------------------------------------
 void configure_pins()
@@ -45,19 +45,22 @@ void play(unsigned short * signal)
 int main()
 {
   configure_pins();
+  int freq = 1;
+  double melody[5];
+  {
+  }
+
   while ( true )
   {
-    Sound sound{440., 1.};
-    //Sound s2{480., 0.0};
-    //sound.add(&s2);
-    Signal sig(sound);
-    for(int i = 0; i<100; ++i) play(sig.data);
-    //Sound s3{440., 1.};
-    //Sound s4{660., .2};
-    //s3.add(&s4);
-    //Signal sig2(s3);
-    //for(int i = 0; i<100; ++i) play(sig2.data);
+    for (short i = 0; i<5; ++i)
+    {
+      freq=melody[i];
+      Sound sound{freq, 1.};
+      Signal sig(sound);
+      for(int dummy = 0; dummy<500; ++dummy) play(sig.data);
+    }
   }
+  
 
   return 0;
 }

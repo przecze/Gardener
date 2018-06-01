@@ -16,7 +16,7 @@ test: test.cc Sound.h
 main.s: main.cc Sound.h defines.h
 	$(CXX) $(CXXFLAGS) -S $<
 	
-main.hex: main main.cc
+main.hex: main
 	$(OBJCOPY) -O ihex $< $@
 
 main.upload: main.hex
