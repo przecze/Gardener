@@ -8,6 +8,9 @@
 #include <defines.h>
 #include <Notes.h>
 
+
+Signal signal;
+
 //---------------------------------------------------------------------------
 void configure_pins()
 {
@@ -28,16 +31,11 @@ void configure_pins()
 }
 
 
-void play(Signal& signal)
+void audio_out(unsigned short to_set)
 {
-  unsigned short to_set = 0;
-  for(int i = 0; i<SIGNAL_LENGTH; ++i)
-  {
-    to_set = signal.data[i];
-    OCR1A = to_set;
-    OCR1B = to_set;
-    _delay_us(TIME_RES_US);
-  }
+  OCR1A = to_set;
+  OCR1B = to_set;
+  _delay_us(TIME_RES_US);
 }
 //---------------------------------------------------------------------------
 int main()
@@ -46,18 +44,30 @@ int main()
   using namespace Note;
   double melody[] = {C,D,E,F,G,A2,B2,C2};
 
-
+  int note_i = 0;
+  int count = 0;
+  Sound sound{C,1.};
+  signal = Signal(sound);
+  int h = 1;
+  //for(long int i = 0; i<16*10000; ++i)
+  //{
+  //  if(i%10000 == 0) ++h;
+  //  audio_out(i%(h));
+  //}
   while ( true )
   {
-    for (short i = 0; i<8; ++i)
+    ++count;
+    if(count >= 1000)
     {
-      double freq=melody[i];
-      Sound sound{freq, 1.};
-      Signal sig(sound);
-      for(int dummy = 0; dummy<100; ++dummy) play(sig);
+      count = 0;
+      ++note_i;
+      if(note_i ==8) note_i = 0;
+      sound = Sound{melody[note_i], 1.};
+      signal = Signal(sound);
     }
+    if(signal.needsSetting) signal.set();
+    audio_out(signal.next());
   }
-  
 
   return 0;
 }

@@ -50,16 +50,26 @@ class Signal
 {
  public:
   unsigned short data[SIGNAL_LENGTH];
-  int  phase_i = 0.;
+  int phase_i = 0;
+  volatile int position = 0;
   double max_amp = 0;
   double min_amp = 0;
   Sound sound;
-  Signal(Sound sound): sound(sound)
+  volatile bool needsSetting;
+
+  Signal(): sound(0.,0.), needsSetting(true){}
+  Signal(Sound sound): sound(sound), needsSetting(true)
   {
+    set();
+  }
+
+  void set()
+  {
+    phase_i+=position;
     double amps[SIGNAL_LENGTH];
     for (int i = 0; i < SIGNAL_LENGTH; ++i)
     {
-      auto amp = sound.localAmplitude(i);
+      auto amp = sound.localAmplitude(phase_i+i);
       if(max_amp < amp) max_amp = amp;
       if(min_amp > amp) min_amp = amp;
       amps[i] = amp;
@@ -71,15 +81,18 @@ class Signal
       short norm_amp = short(tamp * ANALOG_RANGE + 0.5);
       data[i] = norm_amp;
     }
+    needsSetting = false;
   }
+
   unsigned short next()
   {
-    phase_i++;
-    if( phase_i <= SIGNAL_LENGTH-10 ) return data[phase_i-1];
-    auto amp = sound.localAmplitude(phase_i-1);
-    auto tamp = (amp - min_amp)/(max_amp - min_amp);
-    short norm_amp = short(tamp * ANALOG_RANGE + 0.5);
-    return norm_amp;
-    //return 0;
+    position++;
+    if( position < SIGNAL_LENGTH )
+    {
+      if( position != SIGNAL_LENGTH-10 ) return data[position];
+      needsSetting = true;
+      return data[position];
+    }
+    return ANALOG_RANGE;
   }
 };
