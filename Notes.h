@@ -9,5 +9,8 @@ namespace Note {
   constexpr double F = 698.46;
   constexpr double G = 783.99;
   constexpr double A2 = 880;
+  constexpr double B2 = 987.7;
+  constexpr double C2 = 1046.50;
+
 
 }

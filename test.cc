@@ -1,5 +1,6 @@
 #include "defines.h"
 #include "Sound.h"
+#include "Notes.h"
 
 #include <iostream>
 
@@ -14,8 +15,15 @@ void play(unsigned short * data)
 
 int main()
 {
-  Sound sound{440., 1.};
-  Signal sig(sound);
-  play(sig.data);
+  using namespace Note;
+  double melody[] = {A,B,C,D,E,F,G,A2};
+  for (short i = 0; i<8; ++i)
+  {
+    double freq=melody[i];
+    Sound sound{freq, 1.};
+    Signal sig(sound);
+    std::cout<<"asdfasdfasdf: "<<freq<<std::endl;
+    play(sig.data);
+  }
   return 0;
 }

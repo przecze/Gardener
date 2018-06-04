@@ -28,36 +28,31 @@ void configure_pins()
 }
 
 
-void play(unsigned short * signal)
+void play(Signal& signal)
 {
-  unsigned short to_set;
-  for(int i=0; i < SIGNAL_LENGTH; i+= 1)
-  {
-    to_set = i;
-    to_set  = signal[i];
-    OCR1A = to_set;
-    OCR1B = to_set;
-    _delay_us(TIME_RES_US);
-  }
-
+  auto to_set  = signal.next();
+  OCR1A = to_set;
+  OCR1B = to_set;
+  _delay_us(TIME_RES_US);
 }
 //---------------------------------------------------------------------------
 int main()
 {
   configure_pins();
-  int freq = 1;
-  double melody[5];
-  {
-  }
+  using namespace Note;
+  double melody[] = {C,D,E,F,G,A2,B2,C2};
+
 
   while ( true )
   {
-    for (short i = 0; i<5; ++i)
+    for (short i = 0; i<8; ++i)
     {
-      freq=melody[i];
+      double freq=melody[i];
       Sound sound{freq, 1.};
       Signal sig(sound);
-      for(int dummy = 0; dummy<500; ++dummy) play(sig.data);
+      Signal sig2(sound);
+      for(int dummy = 0; dummy<100*100; ++dummy) play(sig);
+      for(int dummy = 0; dummy<100*100; ++dummy) play(sig2);
     }
   }
   

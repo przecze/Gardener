@@ -50,11 +50,13 @@ class Signal
 {
  public:
   unsigned short data[SIGNAL_LENGTH];
-  Signal(const Sound & sound)
+  int  phase_i = 0.;
+  double max_amp = 0;
+  double min_amp = 0;
+  Sound sound;
+  Signal(Sound sound): sound(sound)
   {
     double amps[SIGNAL_LENGTH];
-    double max_amp = 0;
-    double min_amp = 0;
     for (int i = 0; i < SIGNAL_LENGTH; ++i)
     {
       auto amp = sound.localAmplitude(i);
@@ -69,5 +71,13 @@ class Signal
       short norm_amp = short(tamp * ANALOG_RANGE + 0.5);
       data[i] = norm_amp;
     }
+  }
+  unsigned short next()
+  {
+    auto amp = sound.localAmplitude(phase_i);
+    auto tamp = (amp - min_amp)/(max_amp - min_amp);
+    short norm_amp = short(tamp * ANALOG_RANGE + 0.5);
+    phase_i++;
+    return norm_amp;
   }
 };
