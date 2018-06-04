@@ -74,10 +74,12 @@ class Signal
   }
   unsigned short next()
   {
-    auto amp = sound.localAmplitude(phase_i);
+    phase_i++;
+    if( phase_i <= SIGNAL_LENGTH-10 ) return data[phase_i-1];
+    auto amp = sound.localAmplitude(phase_i-1);
     auto tamp = (amp - min_amp)/(max_amp - min_amp);
     short norm_amp = short(tamp * ANALOG_RANGE + 0.5);
-    phase_i++;
     return norm_amp;
+    //return 0;
   }
 };

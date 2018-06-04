@@ -30,10 +30,14 @@ void configure_pins()
 
 void play(Signal& signal)
 {
-  auto to_set  = signal.next();
-  OCR1A = to_set;
-  OCR1B = to_set;
-  _delay_us(TIME_RES_US);
+  unsigned short to_set = 0;
+  for(int i = 0; i<SIGNAL_LENGTH; ++i)
+  {
+    to_set = signal.data[i];
+    OCR1A = to_set;
+    OCR1B = to_set;
+    _delay_us(TIME_RES_US);
+  }
 }
 //---------------------------------------------------------------------------
 int main()
@@ -50,9 +54,7 @@ int main()
       double freq=melody[i];
       Sound sound{freq, 1.};
       Signal sig(sound);
-      Signal sig2(sound);
-      for(int dummy = 0; dummy<100*100; ++dummy) play(sig);
-      for(int dummy = 0; dummy<100*100; ++dummy) play(sig2);
+      for(int dummy = 0; dummy<100; ++dummy) play(sig);
     }
   }
   
