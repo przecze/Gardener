@@ -1,5 +1,4 @@
 #pragma once
-#include <unique_ptr.h>
 #include <defines.h>
 
 #ifdef TEST
@@ -7,6 +6,8 @@
   #ifndef M_PI
       #define M_PI 3.14159265358979323846
   #endif
+#else
+  #include <math.h>
 #endif
 
 class Sound
@@ -39,11 +40,6 @@ class Sound
     if (child != nullptr) ret+= child->localAmplitude(x);
     return ret;
   }
-
-
-  ~Sound()
-  {
-  }
 };
 
 class Signal
@@ -66,6 +62,7 @@ class Signal
   void set()
   {
     phase_i+=position;
+    position = 0;
     double amps[SIGNAL_LENGTH];
     for (int i = 0; i < SIGNAL_LENGTH; ++i)
     {

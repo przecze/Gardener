@@ -2,7 +2,7 @@ ALL=hello
 F_CPU=16000000
 
 CC=avr-gcc
-CFLAGS= -Wall -O2 -DF_CPU=$(F_CPU) -gstabs -std=c++14
+CFLAGS= -Wall -O3 -DF_CPU=$(F_CPU) -gstabs -std=c++14
 CXX="C:\Program Files (x86)\Arduino\hardware\tools\avr/bin/avr-g++"
 INCFLAGS=-I.
 LDFLAGS=-mmcu=atmega328p
@@ -10,10 +10,11 @@ OBJCOPY=avr-objcopy
 AVRDUDE=avrdude -c arduino -p m328p -P COM8 -b 57600
 CXXFLAGS=$(CFLAGS) $(INCFLAGS)
 
-test: test.cc Sound.h
-	g++ -std=c++14 -I. -D TEST test.cc
+test: test.cc Sound.h hardware_mock.h defines.h
+	g++ -std=c++14 -I. -D TEST main.cc
+	./a.exe
 
-main.s: main.cc Sound.h defines.h
+main.s: main.cc Sound.h defines.h hardware.h
 	$(CXX) $(CXXFLAGS) -S $<
 	
 main.hex: main
