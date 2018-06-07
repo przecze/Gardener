@@ -1,7 +1,7 @@
 #pragma once
 
 #define ANALOG_RANGE 32
-#define SIGNAL_LENGTH 128
+#define SIGNAL_LENGTH 150
 #define TIME_RES_US 100
 #ifdef TEST
   #include <iostream>

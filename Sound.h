@@ -19,10 +19,7 @@ class Sound
   //unique_array_ptr<short> data;
   double frequency; // in Hz
   double amplitude; // in V
-  double start; // in ms
-  double end; // in ms
-  double scale;
-  int length;
+  double scale_factor;
   Sound * child;
 
   Sound& add( Sound * sound )
@@ -34,12 +31,12 @@ class Sound
   Sound(double frequency, double amplitude = 1.):
     frequency(frequency), amplitude(amplitude), child(nullptr)
   {
-    scale = frequency * TIME_RES_US/(1000000.) *2*M_PI;
+    scale_factor = frequency * TIME_RES_US/(1000000.) *2*M_PI;
   }
 
   double localAmplitude(int x) const
   {
-    auto ret = amplitude*cos(scale *x);
+    auto ret = amplitude*cos(scale_factor *x);
     if (child != nullptr) ret+= child->localAmplitude(x);
     return ret;
   }

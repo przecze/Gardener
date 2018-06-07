@@ -29,8 +29,8 @@ int main()
 
   int note_i = 0;
   unsigned long long int count = 0;
-  Sound sound{Note::C,1.};
-  signal = Signal(sound);
+  Sound base{Note::C,1.};
+  signal = Signal(base);
   while ( true )
   {
     ++count;
@@ -40,7 +40,8 @@ int main()
       count = 0;
       ++note_i;
       if(note_i ==8) note_i = 0;
-      sound = Sound{melody[note_i], 1.};
+      auto sound = Sound{melody[note_i], 1.};
+      //sound.add(&base);
       signal = Signal(sound);
     }
     if(signal.needs_prepare())
