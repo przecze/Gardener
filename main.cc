@@ -13,11 +13,12 @@
 Signal signal;
 
 #ifdef TEST
-template<typename TIMER2_OVF_vect>
+template<typename TIMER0_COMPA_vect>
 void
 #endif
-ISR(TIMER2_OVF_vect) {
+ISR(TIMER0_COMPA_vect) {
   HW::audio_out(signal.next());
+  HW::toggle_led();
 }
 
 int main()
@@ -27,13 +28,13 @@ int main()
   double melody[] = {C,D,E,F,G,A2,B2,C2};
 
   int note_i = 0;
-  int count = 0;
+  unsigned int count = 0;
   Sound sound{Note::C,1.};
   signal = Signal(sound);
   while ( true )
   {
     ++count;
-    if(count >= 1000)
+    if(count == 40000)
     {
       DEBUG("changing note");
       count = 0;

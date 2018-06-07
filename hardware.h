@@ -4,12 +4,27 @@
 #include <avr/interrupt.h>
 namespace HW
 {
+  void toggle_led()
+  {
+    static int c = 0;
+    cli();
+    c++;
+    if(c==10000)
+    {
+      PORTB ^= (1<<PB5);
+      c = 0;
+    }
+    sei();
+  }
+
   void configure_pins()
   {
-    // Turn on timer with no prescaler on the clock for fastest
-    // triggering of the interrupt service routine.
-    TCCR2B |= (1<<CS20);
-    TIMSK2 |= _BV(TOIE2);
+
+    OCR0A = 200 - 1; // 200 compare value
+    TCCR0A |= (1<<WGM01);
+    TCCR0B |= (1<<CS01); // prescaler 8
+    TIMSK0 |= (1<<OCIE0A);
+    // frequency = 16MHz / (8*200) = 0.01 MHz = 1 / (100us)
 
     // Turn interrupts on.
     sei();
@@ -25,7 +40,7 @@ namespace HW
       TCCR1B |= (1 << WGM12)|(1 << WGM13);
       // set Fast PWM mode using ICR1 as TOP
       
-      TCCR1B |= (1 << CS10);
+      TCCR1B |= (1 << CS00);
       // START the timer with no prescaler
 
   }
@@ -33,8 +48,10 @@ namespace HW
 
   void audio_out(unsigned short to_set)
   {
+    cli();
     OCR1A = to_set;
     OCR1B = to_set;
     _delay_us(TIME_RES_US);
+    sei();
   }
 }

@@ -17,4 +17,8 @@ namespace HW
     }
     std::cout<<amp<<" ";
   }
+  void toggle_led()
+  {
+    DEBUG("toggle led");
+  }
 }
