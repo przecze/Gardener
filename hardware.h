@@ -20,10 +20,10 @@ namespace HW
   void configure_pins()
   {
 
-    OCR0A = 200 - 1; // 200 compare value
-    TCCR0A |= (1<<WGM01);
-    TCCR0B |= (1<<CS01); // prescaler 8
-    TIMSK0 |= (1<<OCIE0A);
+    OCR2A = 200 - 1;
+    TCCR2A |= (1<<WGM21);
+    TCCR2B |= (1<<CS21); // prescaler 8
+    TIMSK2 |= (1<<OCIE2A);
     // frequency = 16MHz / (8*200) = 0.01 MHz = 1 / (100us)
 
     // Turn interrupts on.
@@ -51,7 +51,6 @@ namespace HW
     cli();
     OCR1A = to_set;
     OCR1B = to_set;
-    _delay_us(TIME_RES_US);
     sei();
   }
 }

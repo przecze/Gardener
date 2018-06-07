@@ -13,12 +13,12 @@
 Signal signal;
 
 #ifdef TEST
-template<typename TIMER0_COMPA_vect>
+template<typename TIMER2_COMPA_vect>
 void
 #endif
-ISR(TIMER0_COMPA_vect) {
+ISR(TIMER2_COMPA_vect) {
   HW::audio_out(signal.next());
-  HW::toggle_led();
+  //HW::toggle_led();
 }
 
 int main()
@@ -28,7 +28,7 @@ int main()
   double melody[] = {C,D,E,F,G,A2,B2,C2};
 
   int note_i = 0;
-  unsigned int count = 0;
+  unsigned long long int count = 0;
   Sound sound{Note::C,1.};
   signal = Signal(sound);
   while ( true )
@@ -43,13 +43,10 @@ int main()
       sound = Sound{melody[note_i], 1.};
       signal = Signal(sound);
     }
-    if(signal.needsSetting)
+    if(signal.needs_prepare())
     {
-      DEBUG("Setting signal");
-      signal.set();
+      signal.prepare();
     }
-    //HW::audio_out(signal.next());
-    //HW::audio_out(count%(ANALOG_RANGE+1));
   }
 
   return 0;

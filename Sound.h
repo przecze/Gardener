@@ -5,9 +5,12 @@
   #include <cmath>
   #ifndef M_PI
       #define M_PI 3.14159265358979323846
+void sei(){}
+void cli(){}
   #endif
 #else
   #include <math.h>
+  #include <avr/interrupt.h>
 #endif
 
 class Sound
@@ -46,23 +49,37 @@ class Signal
 {
  public:
   unsigned short data[SIGNAL_LENGTH];
+  unsigned short datatwo[SIGNAL_LENGTH];
   int phase_i = 0;
   volatile int position = 0;
+  volatile unsigned short * current;
   double max_amp = 0;
   double min_amp = 0;
   Sound sound;
-  volatile bool needsSetting;
+  volatile bool prepared;
 
-  Signal(): sound(0.,0.), needsSetting(true){}
-  Signal(Sound sound): sound(sound), needsSetting(true)
+  Signal(): sound(0.,0.), prepared(false){}
+  Signal(Sound sound): sound(sound), prepared(false)
   {
-    set();
+    prepare();
   }
 
-  void set()
+  bool needs_prepare()
   {
-    phase_i+=position;
+    return !prepared;
+  }
+
+  void swap_table()
+  {
     position = 0;
+    if (current == data) current = datatwo;
+    else current = data;
+    prepared = false;
+  }
+
+  void prepare()
+  {
+    phase_i+=SIGNAL_LENGTH;
     double amps[SIGNAL_LENGTH];
     for (int i = 0; i < SIGNAL_LENGTH; ++i)
     {
@@ -71,14 +88,20 @@ class Signal
       if(min_amp > amp) min_amp = amp;
       amps[i] = amp;
     }
+
+    unsigned short * pnew;
+    if (current == data) pnew = datatwo;
+    else pnew = data;
+
     for (int i = 0; i < SIGNAL_LENGTH; ++i)
     {
       auto amp = amps[i];
       auto tamp = (amp - min_amp)/(max_amp - min_amp);
       short norm_amp = short(tamp * ANALOG_RANGE + 0.5);
-      data[i] = norm_amp;
+      pnew[i] = norm_amp;
     }
-    needsSetting = false;
+
+    prepared = true;
   }
 
   unsigned short next()
@@ -86,10 +109,9 @@ class Signal
     position++;
     if( position < SIGNAL_LENGTH )
     {
-      if( position != SIGNAL_LENGTH-10 ) return data[position];
-      needsSetting = true;
-      return data[position];
+      return current[position];
     }
-    return ANALOG_RANGE;
+    swap_table();
+    return current[position];
   }
 };
