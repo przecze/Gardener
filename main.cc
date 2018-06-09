@@ -29,7 +29,7 @@ class CantusFirmusGenerator
 };
 
 Signal signal;
-Sound sound{Note::A, 1.};
+Sound sound{Note::C, 1.};
 CantusFirmusGenerator generator{};
 
 #ifdef TEST
@@ -38,30 +38,24 @@ void
 #endif
 
 ISR(TIMER2_COMPA_vect) {
-  cli();
   HW::audio_out(signal.next());
   signal.position++;
   signal.swap_if_reached_end();
-  sei();
 }
 
+volatile bool next_note = false;
 ISR(TIMER0_COMPA_vect) {
-  //cli();
-  //static unsigned short count = 0;
-  //++count;
-  //if(count != 500/16)
-  //{
-  //  return;
-  //}
-  //HW::toggle_led();
-  //sei();
-  //cli();
+  static unsigned short count = 0;
+  ++count;
+  if(count != 500/4)
+  {
+    return;
+  }
+  cli();
+  count = 0;
   //auto freq = generator.next_note();
-  //DEBUG("changing note to " << freq);
-  //count = 0;
-  //sound = Sound{freq, 1.};
-  //signal = Signal{sound};
-  //sei();
+  next_note = true;
+  sei();
 }
 
 int main()
@@ -77,6 +71,13 @@ int main()
     {
       //HW::toggle_led_if(1);
       signal.prepare();
+    }
+    if(next_note)
+    {
+  HW::toggle_led();
+      sound = Sound{generator.next_note(), 1.};
+      signal.sound = sound;
+      next_note = false;
     }
     
   }

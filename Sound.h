@@ -76,8 +76,6 @@ class Signal
 
   void swap_table()
   {
-    if(!prepared)
-      HW::toggle_led();
     position = 0;
     if (current == data)
     {
