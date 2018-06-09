@@ -2,6 +2,12 @@
 #include <defines.h>
 
 #ifdef TEST
+  #include <hardware_mock.h>
+#else
+  #include <hardware.h>
+#endif
+
+#ifdef TEST
   #include <cmath>
   #ifndef M_PI
       #define M_PI 3.14159265358979323846
@@ -50,49 +56,50 @@ class Signal
   int phase_i = 0;
   volatile int position = 0;
   volatile unsigned short * current;
-  double max_amp = 0;
-  double min_amp = 0;
+  double max_amp = 1;
+  double min_amp = -1;
   Sound sound;
   volatile bool prepared;
 
   Signal(): sound(0.,0.), prepared(false){}
   Signal(Sound sound): sound(sound), prepared(false)
   {
-    prepare();
+    current = datatwo;
+    prepare(); //data is prepared
+    swap_table(); //current changed to data, prepared to false
   }
 
-  bool needs_prepare()
+  inline bool needs_prepare()
   {
     return !prepared;
   }
 
   void swap_table()
   {
+    if(!prepared)
+      HW::toggle_led();
     position = 0;
-    if (current == data) current = datatwo;
-    else current = data;
+    if (current == data)
+    {
+      current = datatwo;
+    }
+    else
+    {
+      current = data;
+    }
     prepared = false;
   }
 
   void prepare()
   {
     phase_i+=SIGNAL_LENGTH;
-    double amps[SIGNAL_LENGTH];
-    for (int i = 0; i < SIGNAL_LENGTH; ++i)
-    {
-      auto amp = sound.localAmplitude(phase_i+i);
-      if(max_amp < amp) max_amp = amp;
-      if(min_amp > amp) min_amp = amp;
-      amps[i] = amp;
-    }
-
     unsigned short * pnew;
     if (current == data) pnew = datatwo;
     else pnew = data;
 
     for (int i = 0; i < SIGNAL_LENGTH; ++i)
     {
-      auto amp = amps[i];
+      auto amp = sound.localAmplitude(phase_i+i);
       auto tamp = (amp - min_amp)/(max_amp - min_amp);
       short norm_amp = short(tamp * ANALOG_RANGE + 0.5);
       pnew[i] = norm_amp;
@@ -101,14 +108,15 @@ class Signal
     prepared = true;
   }
 
-  unsigned short next()
+  void swap_if_reached_end()
   {
-    position++;
-    if( position < SIGNAL_LENGTH )
+    if(position==SIGNAL_LENGTH)
     {
-      return current[position];
+      swap_table();
     }
-    swap_table();
-    return current[position];
+  }
+  inline unsigned short next()
+  {
+      return current[position];
   }
 };
