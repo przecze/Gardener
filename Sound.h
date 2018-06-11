@@ -19,6 +19,55 @@ void cli(){}
   #include <avr/interrupt.h>
 #endif
 
+constexpr int LOOKUP_SIZE = 500;
+constexpr int LOOKUP_MAX = 126;
+class LookupTable
+{ 
+  public:
+  LookupTable()
+  {
+    for(auto _ = LOOKUP_SIZE, i = 0*_; i<LOOKUP_SIZE; ++i)
+    {
+      double omega = (M_PI/2)/LOOKUP_SIZE;
+      data[i] =  LOOKUP_MAX*sin(omega * i) + 0.5;
+    }
+  }
+
+  short sin(double phase)
+  {
+    int index = phase/(M_PI/2)*LOOKUP_SIZE;
+    return getValue(index)/LOOKUP_MAX;
+  }
+
+  short getValue(int index)
+  {
+    DEBUG("index "<<index <<"requested");
+    index = index % (4*size - 4);
+    DEBUG("after modulo index "<<index <<"requested");
+    if(index > 2 * size - 2)
+    {
+      DEBUG("changing to "<<  4*size - 4 - index);
+      return  - getValue(4*size - 4 - index);
+    }
+    if(index > size - 1)
+    {
+      DEBUG("changing to "<<  2*size - 2 - index);
+      return data[2*size - 2 - index];
+    }
+    DEBUG("returning "<< index);
+    return data[index];
+  }
+
+  inline static LookupTable& get()
+  {
+    static LookupTable table{};
+    return table;
+  }
+  private:
+  short data[LOOKUP_SIZE];
+  constexpr static int size = LOOKUP_SIZE;
+};
+
 class Sound
 {
  public:
@@ -27,6 +76,7 @@ class Sound
   double amplitude; // in V
   double scale_factor;
   Sound * child;
+  LookupTable* table;
 
   Sound& add( Sound * sound )
   {
@@ -34,15 +84,15 @@ class Sound
     return *sound;
   }
 
-  Sound(double frequency, double amplitude = 1.):
-    frequency(frequency), amplitude(amplitude), child(nullptr)
+  Sound(double frequency, double amplitude = 1., LookupTable* table = nullptr):
+    frequency(frequency), amplitude(amplitude), child(nullptr), table(table)
   {
     scale_factor = frequency * TIME_RES_US/(1000000.) *2*M_PI;
   }
 
   double localAmplitude(int x) const
   {
-    auto ret = amplitude*cos(scale_factor *x);
+    auto ret = amplitude*table->sin(scale_factor *x);
     if (child != nullptr) ret+= child->localAmplitude(x);
     return ret;
   }

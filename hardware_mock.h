@@ -21,4 +21,8 @@ namespace HW
   {
     DEBUG("toggle led");
   }
+  void toggle_led_if(int max)
+  {
+    DEBUG("toggle led if");
+  }
 }
