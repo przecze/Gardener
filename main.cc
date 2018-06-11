@@ -45,17 +45,17 @@ ISR(TIMER2_COMPA_vect) {
 
 volatile bool next_note = false;
 ISR(TIMER0_COMPA_vect) {
-  static unsigned short count = 0;
-  ++count;
-  if(count != 500/4)
-  {
-    return;
-  }
-  cli();
-  count = 0;
-  //auto freq = generator.next_note();
-  next_note = true;
-  sei();
+  //static unsigned short count = 0;
+  //++count;
+  //if(count != 500/4)
+  //{
+  //  return;
+  //}
+  //cli();
+  //count = 0;
+  ////auto freq = generator.next_note();
+  //next_note = true;
+  //sei();
 }
 
 int main()
@@ -66,19 +66,16 @@ int main()
   DEBUG("starting loop");
   while (true)
   { 
-    //HW::toggle_led_if(10000);
     if(signal.needs_prepare())
     {
-      //HW::toggle_led_if(1);
       signal.prepare();
     }
-    if(next_note)
-    {
-  HW::toggle_led();
-      sound = Sound{generator.next_note(), 1.};
-      signal.sound = sound;
-      next_note = false;
-    }
+    //if(next_note)
+    //{
+    //  sound = Sound{generator.next_note(), 1.};
+    //  signal.sound = sound;
+    //  next_note = false;
+    //}
     
   }
 

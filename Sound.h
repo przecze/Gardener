@@ -110,6 +110,7 @@ class Signal
   {
     if(position==SIGNAL_LENGTH)
     {
+      HW::toggle_led_if(100);
       swap_table();
     }
   }

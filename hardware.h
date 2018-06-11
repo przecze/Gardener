@@ -4,6 +4,14 @@
 #include <avr/interrupt.h>
 namespace HW
 {
+  void led_on()
+  {
+    PORTB |= (1<<PB5);
+  }
+  void led_off()
+  {
+    PORTB &= ~(1<<PB5);
+  }
   void toggle_led()
   {
     PORTB ^= (1<<PB5);
@@ -38,10 +46,10 @@ namespace HW
 
   void set_change_signal_timer()
   {
-    const unsigned short overflow = TIME_RES_US/4 - 1;
+    constexpr unsigned short overflow = TIME_RES_US/4 - 1;
     OCR2A = overflow;
     TCCR2A |= (1<<WGM21);
-    TCCR2B |= (1<<CS21); // prescaler 64
+    TCCR2B |= (1<<CS22); // prescaler 64
     TIMSK2 |= (1<<OCIE2A);
     // frequency = 16MHz * 1/(64*overflow) = 1 / (TIME_RES_US)
   }
@@ -62,7 +70,7 @@ namespace HW
   {
     set_pwm();
     set_change_signal_timer();
-    set_change_note_timer();
+    //set_change_note_timer();
     sei();
 
 
