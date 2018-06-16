@@ -19,8 +19,11 @@ void cli(){}
   #include <avr/interrupt.h>
 #endif
 
+namespace Sound
+{
+
 constexpr int LOOKUP_SIZE = 500;
-constexpr int LOOKUP_MAX = 126;
+constexpr int LOOKUP_MAX = 127;
 class LookupTable
 { 
   public:
@@ -29,71 +32,76 @@ class LookupTable
     for(auto _ = LOOKUP_SIZE, i = 0*_; i<LOOKUP_SIZE; ++i)
     {
       double omega = (M_PI/2)/LOOKUP_SIZE;
-      data[i] =  LOOKUP_MAX*sin(omega * i) + 0.5;
+      int8_t a = LOOKUP_MAX*::sin(omega * i) + 0.5;
+      data[i] = a;
     }
   }
 
-  short sin(double phase)
+  double Sin(double phase)
   {
+
     int index = phase/(M_PI/2)*LOOKUP_SIZE;
-    return getValue(index)/LOOKUP_MAX;
+    int8_t val =  getValue(index);
+    double ret = double(val)/LOOKUP_MAX;
+    return ret;
   }
 
-  short getValue(int index)
+  int8_t getValue(unsigned int index)
   {
-    DEBUG("index "<<index <<"requested");
     index = index % (4*size - 4);
-    DEBUG("after modulo index "<<index <<"requested");
     if(index > 2 * size - 2)
     {
-      DEBUG("changing to "<<  4*size - 4 - index);
-      return  - getValue(4*size - 4 - index);
+      int8_t ret = - getValue(4*size - 4 - index);
+      return ret;
     }
     if(index > size - 1)
     {
-      DEBUG("changing to "<<  2*size - 2 - index);
       return data[2*size - 2 - index];
     }
-    DEBUG("returning "<< index);
     return data[index];
   }
 
-  inline static LookupTable& get()
-  {
-    static LookupTable table{};
-    return table;
-  }
   private:
-  short data[LOOKUP_SIZE];
+  int8_t data[LOOKUP_SIZE];
   constexpr static int size = LOOKUP_SIZE;
 };
 
-class Sound
+LookupTable table{};//for some reason can't be made static. AVR throws linker errors
+double Sin(double x)
+{
+  return table.Sin(x);
+}
+
+class Wave
 {
  public:
   //unique_array_ptr<short> data;
   double frequency; // in Hz
   double amplitude; // in V
   double scale_factor;
-  Sound * child;
+  Wave * child;
   LookupTable* table;
 
-  Sound& add( Sound * sound )
+  Wave& add( Wave * sound )
   {
     child = sound;
     return *sound;
   }
 
-  Sound(double frequency, double amplitude = 1., LookupTable* table = nullptr):
-    frequency(frequency), amplitude(amplitude), child(nullptr), table(table)
+  Wave(double frequency, double amplitude = 1.):
+    frequency(frequency), amplitude(amplitude), child(nullptr)
   {
     scale_factor = frequency * TIME_RES_US/(1000000.) *2*M_PI;
   }
 
   double localAmplitude(int x) const
   {
-    auto ret = amplitude*table->sin(scale_factor *x);
-    if (child != nullptr) ret+= child->localAmplitude(x);
+    auto ret = amplitude*Sin(scale_factor *x);
+    if (child != nullptr)
+    {
+      ERROR_CHECK(true,12);
+      ret+= child->localAmplitude(x);
+    }
     return ret;
   }
 };
@@ -101,18 +109,18 @@ class Sound
 class Signal
 {
  public:
-  unsigned short data[SIGNAL_LENGTH];
-  unsigned short datatwo[SIGNAL_LENGTH];
-  int phase_i = 0;
+  int8_t data[SIGNAL_LENGTH];
+  int8_t datatwo[SIGNAL_LENGTH];
+  unsigned int phase_i = 0;
   volatile int position = 0;
-  volatile unsigned short * current;
+  volatile int8_t * current;
   double max_amp = 1;
   double min_amp = -1;
-  Sound sound;
+  Wave sound;
   volatile bool prepared;
 
   Signal(): sound(0.,0.), prepared(false){}
-  Signal(Sound sound): sound(sound), prepared(false)
+  Signal(Wave sound): sound(sound), prepared(false)
   {
     current = datatwo;
     prepare(); //data is prepared
@@ -126,6 +134,7 @@ class Signal
 
   void swap_table()
   {
+    //ERROR_CHECK(!prepared, 3);
     position = 0;
     if (current == data)
     {
@@ -140,8 +149,9 @@ class Signal
 
   void prepare()
   {
+    ERROR_CHECK(prepared,2);
     phase_i+=SIGNAL_LENGTH;
-    unsigned short * pnew;
+    int8_t * pnew;
     if (current == data) pnew = datatwo;
     else pnew = data;
 
@@ -149,7 +159,7 @@ class Signal
     {
       auto amp = sound.localAmplitude(phase_i+i);
       auto tamp = (amp - min_amp)/(max_amp - min_amp);
-      short norm_amp = short(tamp * ANALOG_RANGE + 0.5);
+      int8_t norm_amp = int8_t(tamp * ANALOG_RANGE + 0.5);
       pnew[i] = norm_amp;
     }
 
@@ -160,7 +170,6 @@ class Signal
   {
     if(position==SIGNAL_LENGTH)
     {
-      HW::toggle_led_if(100);
       swap_table();
     }
   }
@@ -169,3 +178,4 @@ class Signal
       return current[position];
   }
 };
+}

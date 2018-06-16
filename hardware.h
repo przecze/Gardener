@@ -2,6 +2,8 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
+
+#define ERROR_CHECK(_expr, _err_no) do{if(_expr) HW::error_mode(_err_no);}while(false)
 namespace HW
 {
   void led_on()
@@ -24,6 +26,23 @@ namespace HW
     {
       toggle_led();
       c = 0;
+    }
+  }
+
+  void error_mode(int times)
+  {
+    cli();
+    led_off();
+    while(true)
+    {
+      _delay_ms(500);
+      for(int i = 0; i<times; ++i)
+      {
+        led_on();
+        _delay_ms(100);
+        led_off();
+        _delay_ms(200);
+      }
     }
   }
 
@@ -70,7 +89,7 @@ namespace HW
   {
     set_pwm();
     set_change_signal_timer();
-    //set_change_note_timer();
+    set_change_note_timer();
     sei();
 
 
@@ -80,9 +99,7 @@ namespace HW
 
   void audio_out(unsigned short to_set)
   {
-    cli();
     OCR1A = to_set;
     OCR1B = to_set;
-    sei();
   }
 }

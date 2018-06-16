@@ -11,8 +11,8 @@ AVRDUDE=avrdude -c arduino -p m328p -P COM8 -b 57600
 CXXFLAGS=$(CFLAGS) $(INCFLAGS)
 
 test: test.cc Sound.h hardware_mock.h defines.h
-	g++ -std=c++14 -I. -D TEST main.cc
-	./a.exe
+	g++ -o a2.exe -std=c++14 -I. -D TEST main.cc
+	./a2.exe
 
 main.s: main.cc Sound.h defines.h hardware.h
 	$(CXX) $(CXXFLAGS) -S $<

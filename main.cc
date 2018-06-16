@@ -28,61 +28,57 @@ class CantusFirmusGenerator
   }
 };
 
-//Signal signal{};
-//Sound sound{Note::C, 1.};
-LookupTable table{};
-//CantusFirmusGenerator generator{};
+Sound::Signal signal{};
+Sound::Wave sound{Note::C, 1.};
+CantusFirmusGenerator generator{};
 
 volatile bool next_note = false;
 #ifndef TEST
 
 ISR(TIMER2_COMPA_vect) {
-  static int count = 0;
-  ++count;
   HW::audio_out(signal.next());
   signal.position++;
   signal.swap_if_reached_end();
 }
 
 ISR(TIMER0_COMPA_vect) {
-  //static unsigned short count = 0;
-  //++count;
-  //if(count != 500/4)
-  //{
-  //  return;
-  //}
-  //cli();
-  //count = 0;
-  ////auto freq = generator.next_note();
-  //next_note = true;
-  //sei();
+  static unsigned short count = 0;
+  ++count;
+  if(count != 500/4)
+  {
+    return;
+  }
+  cli();
+  count = 0;
+  next_note = true;
+  sei();
 }
 #endif
 
 int main()
 {
-  //sound = Sound{Note::A,1., &table};
-  //signal = Signal(sound);
+  DEBUG("starting main");
+  sound = Sound::Wave{Note::C,1.};
+  Sound::LookupTable table{};
+  signal = Sound::Signal(sound);
   HW::configure_pins();
   DEBUG("starting loop");
-  HW::audio_out(table.sin(0.));
-  HW::audio_out(table.sin(0.5));
-  HW::audio_out(table.sin(0.8));
-  HW::audio_out(table.sin(0.9));
-  //while (true)
-  //{ 
-  //  if(signal.needs_prepare())
-  //  {
-  //    signal.prepare();
-  //  }
-  //  //if(next_note)
-  //  //{
-  //  //  sound = Sound{generator.next_note(), 1.};
-  //  //  signal.sound = sound;
-  //  //  next_note = false;
-  //  //}
-  //  
-  //}
+
+  while (true)
+  { 
+    if(signal.needs_prepare())
+    {
+      signal.prepare();
+      //HW::toggle_led_if(100);
+    }
+    if(next_note)
+    {
+      sound = Sound::Wave{generator.next_note(), 1.};
+      signal.sound = sound;
+      next_note = false;
+    }
+    
+  }
 
   return 0;
 }

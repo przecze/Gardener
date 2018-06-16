@@ -1,5 +1,6 @@
 #pragma once
 #include<iostream>
+#define ERROR_CHECK(_expr, _err_no) if(_expr){std::cout<<"ERROR no "<<_err_no<<std::endl;}
 
 namespace HW
 {
