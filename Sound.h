@@ -31,7 +31,7 @@ class LookupTable
   {
     for(auto _ = LOOKUP_SIZE, i = 0*_; i<LOOKUP_SIZE; ++i)
     {
-      double omega = (M_PI/2)/LOOKUP_SIZE;
+      double omega = (2*M_PI)/size;
       int8_t a = LOOKUP_MAX*::sin(omega * i) + 0.5;
       data[i] = a;
     }
@@ -40,7 +40,7 @@ class LookupTable
   double Sin(double phase)
   {
 
-    int index = phase/(M_PI/2)*LOOKUP_SIZE;
+    int index = phase/(2*M_PI)*size;
     int8_t val =  getValue(index);
     double ret = double(val)/LOOKUP_MAX;
     return ret;
@@ -48,6 +48,7 @@ class LookupTable
 
   int8_t getValue(unsigned int index)
   {
+    return data[index%size];
     index = index % (4*size - 4);
     if(index > 2 * size - 2)
     {
@@ -75,34 +76,16 @@ double Sin(double x)
 class Wave
 {
  public:
-  //unique_array_ptr<short> data;
-  double frequency; // in Hz
-  double amplitude; // in V
   double scale_factor;
-  Wave * child;
-  LookupTable* table;
 
-  Wave& add( Wave * sound )
+  Wave(double frequency):
+    scale_factor(frequency * TIME_RES_US/(1000000.) *2*M_PI)
   {
-    child = sound;
-    return *sound;
   }
 
-  Wave(double frequency, double amplitude = 1.):
-    frequency(frequency), amplitude(amplitude), child(nullptr)
+  inline double localAmplitude(int x) const
   {
-    scale_factor = frequency * TIME_RES_US/(1000000.) *2*M_PI;
-  }
-
-  double localAmplitude(int x) const
-  {
-    auto ret = amplitude*Sin(scale_factor *x);
-    if (child != nullptr)
-    {
-      ERROR_CHECK(true,12);
-      ret+= child->localAmplitude(x);
-    }
-    return ret;
+    return Sin(scale_factor *x);
   }
 };
 
@@ -119,7 +102,7 @@ class Signal
   Wave sound;
   volatile bool prepared;
 
-  Signal(): sound(0.,0.), prepared(false){}
+  Signal(): sound(0.), prepared(false){}
   Signal(Wave sound): sound(sound), prepared(false)
   {
     current = datatwo;
@@ -134,7 +117,7 @@ class Signal
 
   void swap_table()
   {
-    //ERROR_CHECK(!prepared, 3);
+    ERROR_CHECK(!prepared, 3);
     position = 0;
     if (current == data)
     {

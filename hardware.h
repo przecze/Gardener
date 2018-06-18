@@ -35,7 +35,7 @@ namespace HW
     led_off();
     while(true)
     {
-      _delay_ms(500);
+      _delay_ms(800);
       for(int i = 0; i<times; ++i)
       {
         led_on();
