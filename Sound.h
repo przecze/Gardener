@@ -46,6 +46,7 @@ class LookupTable
     return ret;
   }
 
+  private:
   int8_t getValue(unsigned int index)
   {
     return data[index%size];
@@ -62,7 +63,6 @@ class LookupTable
     return data[index];
   }
 
-  private:
   int8_t data[LOOKUP_SIZE];
   constexpr static int size = LOOKUP_SIZE;
 };

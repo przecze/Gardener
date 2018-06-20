@@ -9,3 +9,10 @@
 #else
   #define DEBUG(_msg)
 #endif
+
+#ifdef ERROR_MODE
+  #include <hardware.h>
+  #define ERROR_CHECK(_expr, _err_no) do{if(_expr) HW::error_mode(_err_no);}while(false)
+#else
+  #define ERROR_CHECK(_expr, _err_no)
+#endif
