@@ -17,8 +17,9 @@ Firmus_. The only hardware requirement a mini jack socket connected to Arduino
 Nano's gnd, D9 pins and a low-pass filter to remove some artifact frequencies.
 In this configuration, standard headphones can be used to listen to the melody.
 
-![con1] (https://raw.githubusercontent.com/przecze/MachineThatGoesPing/master/resources/connection_1.jpg)
-![con2] (https://raw.githubusercontent.com/przecze/MachineThatGoesPing/master/resources/connection_2.jpg)
+![con1](resources/connection_1.jpg)
+
+![con2](resources/connection_2.jpg)
 
 The application configures two hardware timers to create the signal: first
 one is used for *PWM*, which allows digital to analog conversion, the other one
