@@ -1,10 +1,11 @@
 # The Machine That Goes *Ping*
 A Cantus Firmus Generator for **atmega328p** (Arduino Nano)
 ## About the project
-This is an example project for microcontroller course held in Summer Semester
-2018 in Physics Department of Warsaw University. It was developed and tested on
-*atmega 328p* chip incorporated on *Arduino Nano*. However, it can be easily
-ported to other hardware when appropriate `hardware_XXX.h` header is provided.
+This is an exercise project for the microcontroller programming course held
+during the summer semester of 2018 in the Physics Department of the Warsaw University. It
+was developed and tested on *atmega 328p* chip incorporated on *Arduino Nano* board.
+However, it can be easily ported to other hardware when appropriate
+`hardware_XXX.h` header is provided.
 
 *Cantus Firmus* (lat: "Firmed Song") is a general name for a melody composed
 according to a set of rules consisting of passages and jumps. It was widely
@@ -14,7 +15,7 @@ Nowadays, it can be heard in sacral and monastic choral music.
 The idea of the project is to create a generator of sinusoidal analog signal,
 which will randomly change the pitch to create a melody similar to _Cantus
 Firmus_. The only hardware requirement a mini jack socket connected to Arduino
-Nano's gnd, D9 pins and a low-pass filter to remove some artifact frequencies.
+Nano's *gnd* and *D9* pins and a low-pass filter to remove some artifact frequencies.
 In this configuration, standard headphones can be used to listen to the melody.
 
 ![con1](resources/connection_1.jpg)
@@ -28,7 +29,7 @@ The third timer is used to change the output frequency randomly but according to
 
 ## Build guide
   1. Configure the toolchain. Open the `Makefile` and change the variables `CXX`,
-`OBJCOPY`, `AVRDUDE` accordingly to your `avr` installation.
+`OBJCOPY`, `AVRDUDE` accordingly to your `avr` installation. *Important:* `avr-g++` compiler version has to support C++14.
   1. Execute:
 
   `make upload`
