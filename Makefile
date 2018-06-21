@@ -3,10 +3,10 @@ F_CPU=16000000
 
 CC=avr-gcc
 CFLAGS= -Wall -O3 -DF_CPU=$(F_CPU) -gstabs -std=c++14
-CXX="C:\Program Files (x86)\Arduino\hardware\tools\avr/bin/avr-g++"
+CXX=avr-g++
 INCFLAGS=-I.
 LDFLAGS=-mmcu=atmega328p
-OBJCOPY="C:\Program Files (x86)\Arduino\hardware\tools\avr/bin/avr-objcopy"
+OBJCOPY=avr-objcopy
 AVRDUDE=avrdude -c arduino -p m328p -P COM8 -b 57600
 CXXFLAGS=$(CFLAGS) $(INCFLAGS)
 HEADERS=Sound.h defines.h hardware.h CantusFirmusGenerator.h
